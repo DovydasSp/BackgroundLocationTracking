@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BackgroundLocationTracking</string>
+    <string name="title_location_permission">Location permission</string>
+    <string name="text_location_permission">IMPORTANT! Please enable location tracking or the app will not function properly!</string>
+    <string name="text_location_permission_failed">Go to settings, turn on location and restart app.</string>
+    <string name="ok">OK</string>
+    <string name="start_service">START</string>
+    <string name="stop_service">STOP</string>
+</resources>

@@ -14,11 +14,13 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.List;
-
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocationService extends Service {
     BroadcastReceiver broadcastReceiver;
@@ -104,9 +106,20 @@ public class LocationService extends Service {
         stopTracking();
     }
 
+    private Map<Integer, String> activityNameMap = new HashMap<Integer, String>() {{
+        put(0, "IN_VEHICLE");
+        put(1, "ON_BICYCLE");
+        put(2, "ON_FOOT");
+        put(3, "STILL");
+        put(4, "UNKNOWN");
+        put(5, "TILTING");
+        put(7, "WALKING");
+        put(8, "RUNNING");
+    }};
+
     //When change in user activity is detected
     private void handleUserActivity(int type, int confidence){
-        Log.i("LocationService", "ActivityDetection type "+type+" confidence "+confidence);
+        Log.i("LocationService", "ActivityDetection type "+type+" "+ activityNameMap.get(type)+" confidence "+confidence);
         //Check if confidence level of activity is reached
         if(confidence > this.getResources().getInteger(R.integer.confideceToReachToAcceptActivity)) {
             SharedPreferences sharedPreferences = getSharedPreferences("locationTrackPrefs", Context.MODE_PRIVATE);

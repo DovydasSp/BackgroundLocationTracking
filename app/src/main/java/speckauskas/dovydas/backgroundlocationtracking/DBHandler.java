@@ -17,6 +17,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public static final String TABLE_NAME = "Locations";
     public static final String COLUMN_ID = "ID";
     public static final String COLUMN_TRIP_ID = "TripID";
+    public static final String COLUMN_DATETIME = "Datetime";
     public static final String COLUMN_NAME_LATITUDE = "Latitude";
     public static final String COLUMN_NAME_LONGITUDE = "Longitude";
 
@@ -30,6 +31,7 @@ public class DBHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_TRIP_ID + " INTEGER, " +
+                COLUMN_DATETIME + " TEXT, " +
                 COLUMN_NAME_LATITUDE + " DOUBLE, "+
                 COLUMN_NAME_LONGITUDE + " DOUBLE)";
         db.execSQL(CREATE_TABLE);
@@ -47,11 +49,12 @@ public class DBHandler extends SQLiteOpenHelper {
         while (cursor.moveToNext()) {
             int result_0 = cursor.getInt(0);
             int result_1 = cursor.getInt(1);
-            double result_2 = cursor.getDouble(2);
+            String result_2 = cursor.getString(2);
             double result_3 = cursor.getDouble(3);
+            double result_4 = cursor.getDouble(4);
             result += String.valueOf(result_0) + " " + String.valueOf(result_1) + " " +
                     String.valueOf(result_2) + " " + String.valueOf(result_3) + " " +
-                    System.getProperty("line.separator");
+                    String.valueOf(result_4) + " " + System.getProperty("line.separator");
         }
         cursor.close();
         db.close();
@@ -61,6 +64,7 @@ public class DBHandler extends SQLiteOpenHelper {
     //ADD TRIP COORDINATES TO DB
     public void addHandler(DBClass location) {
         ContentValues values = new ContentValues();
+        values.put(COLUMN_DATETIME, location.getDateTime());
         values.put(COLUMN_TRIP_ID, location.getTripID());
         values.put(COLUMN_NAME_LATITUDE, location.getLatitude());
         values.put(COLUMN_NAME_LONGITUDE, location.getLongitude());
@@ -82,17 +86,39 @@ public class DBHandler extends SQLiteOpenHelper {
                 DBClass location = new DBClass();
                 location.setID(cursor.getInt(0));
                 location.setTripID(cursor.getInt(1));
-                location.setLatitude(cursor.getDouble(2));
-                location.setLongitude(cursor.getDouble(3));
+                location.setDateTime(cursor.getString(2));
+                location.setLatitude(cursor.getDouble(3));
+                location.setLongitude(cursor.getDouble(4));
                 locationList.add(location);
                 cursor.moveToNext();
             }
+            cursor.close();
         } else {
             locationList = null;
         }
-        cursor.close();
         db.close();
         return locationList;
+    }
+
+    //GET LAST STORED TRIP
+    public int findLastTripHandler() {
+        String query = "Select " + COLUMN_TRIP_ID + " FROM " + TABLE_NAME + ";";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        int lastTrip = -1;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            for(int i = 0; i < cursor.getCount(); i++)
+            {
+                int thisTrip = cursor.getInt(0);
+                if(thisTrip > lastTrip)
+                    lastTrip = thisTrip;
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        db.close();
+        return lastTrip;
     }
 
     //DUMP TABLE VALUES

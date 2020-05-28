@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="notificationIntrusivenessLevel">1</integer>
+    <integer name="notificationIntrusivenessLevel">2</integer>
     <integer name="userActivitiesPullRateInMS">1000</integer>
     <integer name="confideceToReachToAcceptActivity">70</integer>
     <integer name="gpsUpdatingRateInMS">3000</integer>

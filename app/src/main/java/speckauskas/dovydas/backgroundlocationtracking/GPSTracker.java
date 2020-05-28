@@ -11,8 +11,16 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import speckauskas.dovydas.backgroundlocationtracking.rest.RestRequest;
 
 public class GPSTracker extends Service implements LocationListener {
 
@@ -60,6 +68,7 @@ public class GPSTracker extends Service implements LocationListener {
     private Timer timer;
     private TimerTask timerTask;
     private Location lastLocation = null;
+    private int thisTripID = -1;
 
     //Start gps tracking timer
     public void startTracking(int thisTripID){
@@ -67,11 +76,16 @@ public class GPSTracker extends Service implements LocationListener {
 
         initializeTrackerTask(thisTripID);
 
-        timer.schedule(timerTask, 10, this.getResources().getInteger(R.integer.gpsUpdatingRateInMS));
+        try {
+            timer.schedule(timerTask, 10, this.getResources().getInteger(R.integer.gpsUpdatingRateInMS));
+        } catch (NullPointerException e) {
+            timer.schedule(timerTask, 10, 3000);
+        }
     }
 
     //TimerTast to pull gps coordinates and put them to DB
     private void initializeTrackerTask(final int thisTripID) {
+        this.thisTripID = thisTripID;
         timerTask = new TimerTask() {
             public void run() {
                 Log.i("GPSTracker", "Location timer ticks passed "+ (counter++));
@@ -83,7 +97,8 @@ public class GPSTracker extends Service implements LocationListener {
                     if(distance > 10.0)
                     {
                         DBHandler dbHandler = new DBHandler(mContext, null, null, 1);
-                        DBClass locationClass = new DBClass(0, thisTripID, thisLocation.getLatitude(), thisLocation.getLongitude());
+                        String dateTime =  new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().getTime());
+                        DBClass locationClass = new DBClass(0, thisTripID, dateTime, thisLocation.getLatitude(), thisLocation.getLongitude());
                         dbHandler.addHandler(locationClass);
                         lastLocation = thisLocation;
                     }
@@ -99,6 +114,7 @@ public class GPSTracker extends Service implements LocationListener {
         timer.cancel();
         timer.purge();
         timer = null;
+        sendTripDataToServer();
     }
 
     //Function to get latitude
@@ -138,4 +154,21 @@ public class GPSTracker extends Service implements LocationListener {
         return null;
     }
 
+    private void sendTripDataToServer() {
+        List<DBClass> lastTrip = findLastTrip();
+        if(lastTrip != null) {
+            RestRequest restRequest = new RestRequest();
+            //TODO put the URL in to use coordinates post to REST API
+            restRequest.postTrip("", lastTrip);
+        }
+    }
+
+    private List<DBClass> findLastTrip() {
+        DBHandler dbHandler = new DBHandler(mContext, null, null, 1);
+        List<DBClass> trip = dbHandler.findHandler(thisTripID);
+        if(trip == null || trip.isEmpty())
+            return null;
+        else
+            return trip;
+    }
 }

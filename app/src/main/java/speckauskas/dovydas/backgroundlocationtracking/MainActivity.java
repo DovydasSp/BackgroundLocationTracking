@@ -20,6 +20,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import speckauskas.dovydas.backgroundlocationtracking.map.MapsActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     Intent locationIntent;
@@ -57,8 +59,20 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferenceKillService.edit();
                 editor.putBoolean("killProcess", true); //Process needs to be killed
                 editor.commit();
-                locationService.stopSelf(); //Stop all processes
-                stopService(locationIntent);
+                if(locationService != null) {
+                    locationService.stopSelf(); //Stop all processes
+                    stopService(locationIntent);
+                }
+            }
+        });
+
+        Button mapsButton = findViewById(R.id.openMapButton);
+        mapsButton.setOnClickListener( new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MapsActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -97,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             //Prompt the user once explanation has been shown
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 99);
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION}, 99);
                         }
                     })
                     .create()

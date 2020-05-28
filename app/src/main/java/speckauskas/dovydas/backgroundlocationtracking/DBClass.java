@@ -7,13 +7,15 @@ public class DBClass {
     private int tripID;
     private double latitude;
     private double longitude;
+    private String dateTime;
     // constructors
     public DBClass() {}
-    public DBClass(int dataID, int tripID, double latitude, double longitude) {
+    public DBClass(int dataID, int tripID, String dateTime, double latitude, double longitude) {
         this.dataID = dataID;
         this.tripID = tripID;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.dateTime = dateTime;
     }
     // properties
     public void setID(int id) {
@@ -39,5 +41,11 @@ public class DBClass {
     }
     public double getLongitude() {
         return this.longitude;
+    }
+    public String getDateTime() {
+        return dateTime;
+    }
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
     }
 }
